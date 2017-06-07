@@ -88,7 +88,8 @@ void loop() {
     Serial.println(potValue);
 #endif
 
-  unsigned int toneValue =  MIN_TONE + rawEC;
+  // expand the range of the tone value by doubling the rawEC
+  unsigned int toneValue =  MIN_TONE + (rawEC * 2) - 500;
 
   // Here, we can modulate the toneValue with something like this
    //(rawEC*4) - 600 - ( (500 - potValue)/5);
@@ -100,6 +101,8 @@ void loop() {
     // Handle less-than-zero, will overflow to large 8-bit (65535) number
     if( toneValue > 50000 )
       toneValue = MIN_TONE;
+
+      toneValue += (potValue/5);
 
 #ifdef SERIAL_DEBUG       
      Serial.print("Tone value = ");
