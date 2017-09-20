@@ -12,12 +12,15 @@
  *  
  */
 
+#include "Adafruit_LEDBackpack.h"
+#include "MSTimer.h"
+
 //-- leave uncommented to see serial debug messages
 #define SERIAL_DEBUG
 
 //-- Conditional defines for testing hardware
 //#define SPEAKER_ONLY            // just play ascending tones, to make sure speaker works, tests speakers
-//#define SPEAKER_POT             // plays speaker according to potentiometer, tests pot
+//  #define SPEAKER_POT             // plays speaker according to potentiometer, tests pot
 
 //-- PINS
 #define speakerGndPin (10)        // set this to low so we can do direct soldering to Metro Mini
@@ -25,14 +28,20 @@
 
 #define PotPin (A0)
 #define ECPower (A1)
-#define ECPin (A5)   
+#define ECPin (A3)   
 
 //-- If raw EC is above this, we won't play the sounds
 #define EC_SILENT_THRESHOLD (970)
 #define DELAY_TIME (100)
-#define MIN_TONE (25)
- 
+#define MIN_TONE (31)   // lowest possible tone for Arduinos
+
+Adafruit_7segment matrix = Adafruit_7segment();
+MSTimer displayTimer = MSTimer();
 void setup() {
+  matrix.begin(0x70);
+  matrix.print(9999, DEC);
+  matrix.writeDisplay();
+  
 #ifdef SERIAL_DEBUG
   //-- no serial support for the Digispark
   Serial.begin(115200);
@@ -47,6 +56,10 @@ void setup() {
 
   //-- speaker ground is always low
   digitalWrite(speakerGndPin,LOW);
+
+  // every 1000ms we will update the display, for readability
+  displayTimer.setTimer(1000);
+  displayTimer.start();
 }
 
 //-- rawEC == 0 -> max conductivity; rawEC == 1023, no conductivity
@@ -54,6 +67,12 @@ void loop() {
   // Get inputs: EC and Pot Value
   unsigned int rawEC = getEC(); 
   int potValue = analogRead(PotPin);;
+
+  if( displayTimer.isExpired() ) {
+    matrix.print(rawEC, DEC);
+    matrix.writeDisplay();
+    displayTimer.start();
+  }
   
 #ifdef SPEAKER_ONLY
   speakerOnlyTest();
@@ -108,6 +127,7 @@ void loop() {
      Serial.print("Tone value = ");
      Serial.println(toneValue);
 #endif 
+
 
     //-- emit some sort of tone based on EC
     tone(speakerPin, toneValue );
