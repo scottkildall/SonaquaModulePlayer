@@ -107,13 +107,8 @@ void loop() {
     Serial.println(potValue);
 #endif
 
-  // expand the range of the tone value by doubling the rawEC
-  unsigned int toneValue =  MIN_TONE + (rawEC * 2) - 500;
-
-  // Here, we can modulate the toneValue with something like this
-   //(rawEC*4) - 600 - ( (500 - potValue)/5);
-  
-  
+  unsigned int toneValue = getToneValueFromEC(rawEC);
+ 
   if (toneValue < 0 )
     toneValue = MIN_TONE;
 
@@ -148,6 +143,14 @@ unsigned int getEC(){
  
  return raw;
 }
+
+// expand the range of the tone value by doubling the rawEC and doing some various math to it
+// this works for a sampling range where minumim EC < 400
+unsigned int getToneValueFromEC(unsigned int rawEC) {
+  unsigned int toneValue =  MIN_TONE + (rawEC * 2) - 800;
+  return toneValue;
+}
+
 
 
 void speakerOnlyTest() {
