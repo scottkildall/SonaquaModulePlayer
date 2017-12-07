@@ -23,12 +23,14 @@
 //  #define SPEAKER_POT             // plays speaker according to potentiometer, tests pot
 
 //-- PINS
-#define speakerGndPin (10)        // set this to low so we can do direct soldering to Metro Mini
-#define speakerPin (12)
+//#define speakerGndPin (10)        // set this to low so we can do direct soldering to Metro Mini
+#define speakerPin (8)
 
 #define PotPin (A0)
-#define ECPower (A1)
-#define ECPin (A3)   
+#define ECPower (A2)
+#define ECPin (A1)   
+
+#define LEDPin (9)
 
 //-- If raw EC is above this, we won't play the sounds
 #define EC_SILENT_THRESHOLD (970)
@@ -38,6 +40,24 @@
 Adafruit_7segment matrix = Adafruit_7segment();
 MSTimer displayTimer = MSTimer();
 void setup() {
+
+   //-- pin inputs / outputs
+  pinMode(ECPin,INPUT);
+  pinMode(ECPower,OUTPUT);                // set pin for sourcing current
+  pinMode(speakerPin, OUTPUT); 
+ // pinMode(speakerGndPin, OUTPUT);
+  pinMode(LEDPin,OUTPUT);                // set pin for sourcing current
+
+
+  // Flash LED
+  for(int i = 0; i < 6; i++ ) {
+    digitalWrite(LEDPin,HIGH);
+    delay(100);
+    digitalWrite(LEDPin,LOW);
+    delay(100);
+  }
+  digitalWrite(LEDPin,HIGH);
+  
   matrix.begin(0x70);
   matrix.print(9999, DEC);
   matrix.writeDisplay();
@@ -48,18 +68,18 @@ void setup() {
   Serial.println("startup");
 #endif
 
-  //-- pin inputs / outputs
-  pinMode(ECPin,INPUT);
-  pinMode(ECPower,OUTPUT);                // set pin for sourcing current
-  pinMode(speakerPin, OUTPUT); 
-  pinMode(speakerGndPin, OUTPUT);
-
+ 
   //-- speaker ground is always low
-  digitalWrite(speakerGndPin,LOW);
+  //digitalWrite(speakerGndPin,LOW);
 
   // every 1000ms we will update the display, for readability
   displayTimer.setTimer(1000);
   displayTimer.start();
+   
+   matrix.begin(0x70);
+ 
+  matrix.print(7777, DEC);
+  matrix.writeDisplay();
 }
 
 //-- rawEC == 0 -> max conductivity; rawEC == 1023, no conductivity
